@@ -1,73 +1,78 @@
-# import requests
-# from bs4 import BeautifulSoup
-
-# wine_list = []
-
-# url = 'https://www.thereporterethiopia.com/latest-ethiopian-political-news/'
-
-# headers = {
-#     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-# }
-
-# r = requests.get(url, headers=headers)
-# soup = BeautifulSoup(r.content, features='lxml')
-
-# articles = soup.find_all('div', class_='tdb-module-title-wrap')
-# for item in articles:
-#     try:
-#         title = item.find('h3')
-#         link = title.find('a')['href']  # Extract the URL from the 'href' attribute
-#         article = {
-#             'title': title.text,
-#             'link': link
-#         }
-#         wine_list.append(article)
-
-#     except:
-#         print("Failed")
-#         pass
-
-# print(wine_list)
-
-
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 from requests_html import HTMLSession
+import traceback
 wine_list = []
-
-url = 'https://www.thereporterethiopia.com/latest-ethiopian-political-news/'
+image_links = []
 
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
 }
 
-session = HTMLSession()
-r = session.get(url, headers=headers)
+def step_one(my_url,scroll=0):
+    url = my_url
+    session = HTMLSession()
+    r = session.get(url, headers=headers)
 
-r.html.render(sleep=1, scrolldown=1)
+    r.html.render(sleep=1, scrolldown=scroll)
+    # Wait for the page to load after scrolling
+    soup = BeautifulSoup(r.html.html, features='lxml')
+    return soup
 
-# Wait for the page to load after scrolling
+soup=step_one('https://www.thereporterethiopia.com/latest-ethiopian-political-news/',3)
 
-soup = BeautifulSoup(r.html.html, features='lxml')
+def parse(soup):
+    articles = soup.find_all('div', class_='td-module-meta-info')
+    for item in articles:
+        try:
+            title = item.find('h3')
+            link = title.find('a')['href']  # Extract the URL from the 'href' attribute
 
-articles = soup.find_all('div', class_='td-module-meta-info')
-for item in articles:
-    try:
-        title = item.find('h3')
-        link = title.find('a')['href']  # Extract the URL from the 'href' attribute
-        article = {
-            'title': title.find('a').text,
-            'link': link
-        }
-        wine_list.append(article)
+            link_soup=step_one(link)
+            data=link_soup.find('div',class_='td_block_wrap tdb_single_content tdi_155 td-pb-border-top td_block_template_1 td-post-content tagdiv-type')
+            rendered_data=[]
+            if data:
+                paragraphs=data.find_all('div', attrs={'dir': 'auto'})
+                for paragraph in paragraphs:
+                    rendered_data.append(paragraph.text)
 
-    except:
-        print("Failed")
-        pass
+                paragraphs = data.find_all('p')
+                for paragraph in paragraphs:
+                    rendered_data.append(paragraph.text)
+                
+            head_lines=link_soup.find('h1')            
+            article = {
+                'teaser-title': title.find('a').text,
+                'link': link,
+                'head_line':head_lines.text,
+                'real-data':rendered_data
+            }
+            wine_list.append(article)
 
-df=pd.DataFrame(wine_list)
-df.to_csv('newsarticles.csv',index=False)
+        except Exception as e:
+            print(f"Exception occurred: {e}")
+            traceback.print_exc()
+
+    images = soup.find_all('div',class_='td-module-thumb')
+    for item in images:
+        try:
+            image_link=item.find('span')['data-bg']
+            image_links.append(image_link)
+        except Exception as e:
+            print(f"Exception occurred: {e}")
+            traceback.print_exc()
+
+    
+
+parse(soup)
+
+def conc():
+    df=pd.DataFrame(wine_list)
+    df['image_links']=image_links
+    df.to_csv('newsarticles.csv',index=False)
+    print(df[1:4])
+conc()
 
 
 
@@ -76,45 +81,3 @@ df.to_csv('newsarticles.csv',index=False)
 
 
 
-
-# from selenium import webdriver
-# from selenium.webdriver.chrome.options import Options
-# from bs4 import BeautifulSoup
-# import time
-# wine_list = []
-
-# url = 'https://www.thereporterethiopia.com/latest-ethiopian-political-news/'
-
-# # Set up Chrome WebDriver with Selenium
-# chrome_options = Options()
-# chrome_options.add_argument('--headless')  # Run Chrome in headless mode
-# driver = webdriver.Chrome(options=chrome_options)
-
-# driver.get(url)
-
-# # Wait for the page to fully render (adjust the sleep time as needed)
-# time.sleep(5)
-
-# # Extract the page source after rendering
-# page_source = driver.page_source
-
-# driver.quit()
-
-# soup = BeautifulSoup(page_source, 'html.parser')
-
-# articles = soup.find_all('div', class_='tdb-module-title-wrap')
-# for item in articles:
-#     try:
-#         title = item.find('h3')
-#         link = title.find('a')['href']  # Extract the URL from the 'href' attribute
-#         article = {
-#             'title': title.text,
-#             'link': link
-#         }
-#         wine_list.append(article)
-
-#     except:
-#         print("Failed")
-#         pass
-
-# print(wine_list[0])
