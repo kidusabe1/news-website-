@@ -48,7 +48,7 @@ api_id = '29549426'
 api_hash = '44bd5a957eefe65197fe22275a65dc30'
 phone_number = '918984937192'
 channel_username = 'tikvahethiopia'
-limit = 2
+limit = 10
 
 # Scrape the Telegram channel
 scraped_data = scrape_telegram_channel(api_id, api_hash, phone_number, channel_username, limit)
@@ -57,8 +57,7 @@ scraped_data = scrape_telegram_channel(api_id, api_hash, phone_number, channel_u
 df = pd.DataFrame(scraped_data)
 
 # Generate image URLs based on the local file paths
-df['ImageURL'] = df['ImagePath'].apply(lambda path: f'file://{os.path.abspath(path)}')
-
+df['ImageURL'] = df['ImagePath'].apply(lambda path: f'file://{os.path.abspath(path)}' if path is not None else '')
 # Specify the path and filename for the CSV file
 csv_filename = 'telegram_data.csv'
 df.to_csv(csv_filename, index=False)
