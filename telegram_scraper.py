@@ -13,6 +13,7 @@ def save_image_from_bytes(image_bytes, filename):
 def scrape_telegram_channel(api_id, api_hash, phone_number, channel_username, limit):
     # Create a TelegramClient object and authenticate
     client = TelegramClient('session_name', api_id, api_hash)
+    data = []
     for name in channel_username:
         print(name)
         client.connect()
@@ -26,7 +27,6 @@ def scrape_telegram_channel(api_id, api_hash, phone_number, channel_username, li
         # Retrieve the messages from the channel
         messages = client.get_messages(entity, limit=limit)
 
-        data = []
         for message in messages:
             text = message.text
             date = message.date
