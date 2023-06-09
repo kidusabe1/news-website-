@@ -10,7 +10,7 @@ def save_image_from_bytes(image_bytes, filename):
     with open(filename, 'wb') as file:
         file.write(image_bytes)
 
-def scrape_telegram_channel(api_id, api_hash, phone_number, channel_username, limit):
+def scrape_telegram_channel(api_id, api_hash, phone_number, channel_username, date_limit):
     # Create a TelegramClient object and authenticate
     client = TelegramClient('session_name', api_id, api_hash)
     data = []
@@ -25,9 +25,11 @@ def scrape_telegram_channel(api_id, api_hash, phone_number, channel_username, li
         entity = client.get_entity(name)
 
         # Retrieve the messages from the channel
-        messages = client.get_messages(entity, limit=limit)
+        messages = client.get_messages(entity)
 
         for message in messages:
+            if message.date.date() != date_limit.date():
+                break
             text = message.text
             date = message.date
             image_bytes = None
@@ -49,10 +51,10 @@ api_id = '29549426'
 api_hash = '44bd5a957eefe65197fe22275a65dc30'
 phone_number = '918984937192'
 channel_username = ['tikvahethiopia','fanatelevision','ethio_mereja','Esat_tv1']
-limit = 5
+date_limit = pd.Timestamp(2023,6,9)
 
 # Scrape the Telegram channel
-scraped_data = scrape_telegram_channel(api_id, api_hash, phone_number, channel_username, limit)
+scraped_data = scrape_telegram_channel(api_id, api_hash, phone_number, channel_username, date_limit)
 
 # Create a DataFrame from the scraped data
 df = pd.DataFrame(scraped_data)
