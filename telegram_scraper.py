@@ -28,7 +28,12 @@ def scrape_telegram_channel(api_id, api_hash, phone_number, channel_username, da
         messages = client.get_messages(entity)
 
         for message in messages:
-            if message.date.date() != date_limit.date():
+            if message.date.date() < date_limit.date():
+                # Skip messages that are older than the date limit
+                continue
+
+            if message.date.date() > date_limit.date():
+                # Stop processing messages once we exceed the date limit
                 break
             text = message.text
             date = message.date
@@ -64,3 +69,7 @@ df['ImageURL'] = df['ImagePath'].apply(lambda path: f'file://{os.path.abspath(pa
 # Specify the path and filename for the CSV file
 csv_filename = 'telegram_data.csv'
 df.to_csv(csv_filename, index=False)
+
+
+#what do I need to solve next?
+#--> fix the bug with the date limit
