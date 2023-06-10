@@ -25,15 +25,15 @@ def scrape_telegram_channel(api_id, api_hash, phone_number, channel_username, da
         entity = client.get_entity(name)
 
         # Retrieve the messages from the channel using an iterator
-        messages = client.iter_messages(entity,limit=50)
+        messages = client.iter_messages(entity, limit=50)
         for message in messages:
-            print(message.date.date())
             if message.date.date() == date_limit.date():
-                print(f"{message.date}\n\n\n{message.text}")
                 text = message.text
                 date = message.date
                 image_bytes = None
                 image_path = None
+
+                image_urls = []  # List to store image URLs associated with the text
 
                 if isinstance(message.media, MessageMediaPhoto):
                     photo = message.photo
@@ -43,7 +43,9 @@ def scrape_telegram_channel(api_id, api_hash, phone_number, channel_username, da
                             image_path = f'images/{message.id}.jpg'  # Assuming you want to save the images in a folder named "images"
                             save_image_from_bytes(image_bytes, image_path)
 
-                data.append({'Text': text, 'Date': date, 'ImagePath': image_path})
+                            image_urls.append(f'file://{os.path.abspath(image_path)}')  # Store image URL in the list
+
+                data.append({'Text': text, 'Date': date, 'ImagePath': image_path, 'ImageURLs': image_urls})
             else:
                 continue
     return data
@@ -61,8 +63,9 @@ scraped_data = scrape_telegram_channel(api_id, api_hash, phone_number, channel_u
 # Create a DataFrame from the scraped data
 df = pd.DataFrame(scraped_data)
 
-# Generate image URLs based on the local file paths
-df['ImageURL'] = df['ImagePath'].apply(lambda path: f'file://{os.path.abspath(path)}' if path is not None else '')
+# Combine the image URLs into a single string separated by commas
+df['ImageURLs'] = df['ImageURLs'].apply(lambda urls: ', '.join(urls) if urls else '')
+
 # Specify the path and filename for the CSV file
 csv_filename = 'telegram_data.csv'
 df.to_csv(csv_filename, index=False)
