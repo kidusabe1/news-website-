@@ -24,20 +24,11 @@ def scrape_telegram_channel(api_id, api_hash, phone_number, channel_username, da
         # Get the channel entity
         entity = client.get_entity(name)
 
-        # Retrieve the messages from the channel
-        messages = client.get_messages(entity)
-
+        # Retrieve the messages from the channel using an iterator
+        messages = client.iter_messages(entity,limit=50)
         for message in messages:
-            # if message.date.date() < date_limit.date():
-            #     print(f"{message.date.date()} is going to skip")
-            #     # Skip messages that are older than the date limit
-            #     continue
-
-            # if message.date.date() > date_limit.date():
-            #     print(f"{message.date.date()} is going to break")
-            #     # Stop processing messages once we exceed the date limit
-            #     break
-            if message.date.date() >= date_limit.date():
+            if message.date.date() == date_limit.date():
+                print(f"{message.date}\n\n\n{message.text}")
                 text = message.text
                 date = message.date
                 image_bytes = None
@@ -52,6 +43,8 @@ def scrape_telegram_channel(api_id, api_hash, phone_number, channel_username, da
                             save_image_from_bytes(image_bytes, image_path)
 
                 data.append({'Text': text, 'Date': date, 'ImagePath': image_path})
+            else:
+                continue
     return data
 
 # Specify your API credentials and other parameters
@@ -59,7 +52,7 @@ api_id = '29549426'
 api_hash = '44bd5a957eefe65197fe22275a65dc30'
 phone_number = '918984937192'
 channel_username = ['tikvahethiopia','fanatelevision','ethio_mereja','Esat_tv1']
-date_limit = pd.Timestamp(2023,6,5)
+date_limit = pd.Timestamp(2023,6,9)
 
 # Scrape the Telegram channel
 scraped_data = scrape_telegram_channel(api_id, api_hash, phone_number, channel_username, date_limit)
