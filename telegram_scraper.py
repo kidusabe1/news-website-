@@ -28,27 +28,30 @@ def scrape_telegram_channel(api_id, api_hash, phone_number, channel_username, da
         messages = client.get_messages(entity)
 
         for message in messages:
-            if message.date.date() < date_limit.date():
-                # Skip messages that are older than the date limit
-                continue
+            # if message.date.date() < date_limit.date():
+            #     print(f"{message.date.date()} is going to skip")
+            #     # Skip messages that are older than the date limit
+            #     continue
 
-            if message.date.date() > date_limit.date():
-                # Stop processing messages once we exceed the date limit
-                break
-            text = message.text
-            date = message.date
-            image_bytes = None
-            image_path = None
+            # if message.date.date() > date_limit.date():
+            #     print(f"{message.date.date()} is going to break")
+            #     # Stop processing messages once we exceed the date limit
+            #     break
+            if message.date.date() >= date_limit.date():
+                text = message.text
+                date = message.date
+                image_bytes = None
+                image_path = None
 
-            if isinstance(message.media, MessageMediaPhoto):
-                photo = message.photo
-                if photo is not None:
-                    image_bytes = client.download_media(photo, bytes)
-                    if image_bytes is not None:
-                        image_path = f'images/{message.id}.jpg'  # Assuming you want to save the images in a folder named "images"
-                        save_image_from_bytes(image_bytes, image_path)
+                if isinstance(message.media, MessageMediaPhoto):
+                    photo = message.photo
+                    if photo is not None:
+                        image_bytes = client.download_media(photo, bytes)
+                        if image_bytes is not None:
+                            image_path = f'images/{message.id}.jpg'  # Assuming you want to save the images in a folder named "images"
+                            save_image_from_bytes(image_bytes, image_path)
 
-            data.append({'Text': text, 'Date': date, 'ImagePath': image_path})
+                data.append({'Text': text, 'Date': date, 'ImagePath': image_path})
     return data
 
 # Specify your API credentials and other parameters
@@ -56,7 +59,7 @@ api_id = '29549426'
 api_hash = '44bd5a957eefe65197fe22275a65dc30'
 phone_number = '918984937192'
 channel_username = ['tikvahethiopia','fanatelevision','ethio_mereja','Esat_tv1']
-date_limit = pd.Timestamp(2023,6,9)
+date_limit = pd.Timestamp(2023,6,5)
 
 # Scrape the Telegram channel
 scraped_data = scrape_telegram_channel(api_id, api_hash, phone_number, channel_username, date_limit)
