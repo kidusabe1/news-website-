@@ -62,14 +62,6 @@ scraped_data = scrape_telegram_channel(api_id, api_hash, phone_number, channel_u
 # Create a DataFrame from the scraped data
 df = pd.DataFrame(scraped_data)
 
-# Generate image URLs based on the local file paths
-
-df['ImageURL'] = df['ImagePath'].apply(
-    lambda path: f"<?php echo esc_url(site_url('{os.path.abspath(path)}')); ?>" if path is not None else ''
-)
-
-
-
 
 # Specify the path and filename for the CSV file
 csv_filename = 'telegram_data.csv'
