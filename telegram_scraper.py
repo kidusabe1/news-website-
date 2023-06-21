@@ -25,9 +25,9 @@ def scrape_telegram_channel(api_id, api_hash, phone_number, channel_username, da
         entity = client.get_entity(name)
 
         # Retrieve the messages from the channel using an iterator
-        messages = client.iter_messages(entity,limit=50)
+        messages = client.iter_messages(entity, limit=50)
         for message in messages:
-            if message.date.date() == date_limit.date():
+            if message.date.date() == date_limit.date() and message.text:
                 print(f"{message.date}\n\n\n{message.text}")
                 text = message.text
                 date = message.date
@@ -51,8 +51,10 @@ def scrape_telegram_channel(api_id, api_hash, phone_number, channel_username, da
 api_id = '29549426'
 api_hash = '44bd5a957eefe65197fe22275a65dc30'
 phone_number = '918984937192'
-channel_username = ['tikvahethiopia','fanatelevision','ethio_mereja','Esat_tv1']
-date_limit = pd.Timestamp(2023,6,9)
+# channel_username = ['tikvahethiopia', 'fanatelevision', 'ethio_mereja', 'Esat_tv1']
+channel_username = ['tikvahethiopia', 'fanatelevision']
+
+date_limit = pd.Timestamp(2023, 6, 20)
 
 # Scrape the Telegram channel
 scraped_data = scrape_telegram_channel(api_id, api_hash, phone_number, channel_username, date_limit)
@@ -61,11 +63,16 @@ scraped_data = scrape_telegram_channel(api_id, api_hash, phone_number, channel_u
 df = pd.DataFrame(scraped_data)
 
 # Generate image URLs based on the local file paths
-df['ImageURL'] = df['ImagePath'].apply(lambda path: f'file://{os.path.abspath(path)}' if path is not None else '')
+
+df['ImageURL'] = df['ImagePath'].apply(
+    lambda path: f"<?php echo esc_url(site_url('{os.path.abspath(path)}')); ?>" if path is not None else ''
+)
+
+
+
+
 # Specify the path and filename for the CSV file
 csv_filename = 'telegram_data.csv'
 df.to_csv(csv_filename, index=False)
-
-
 #what do I need to solve next?
-#--> fix the bug with the date limit
+#--> fix with the cell positioning of the images
