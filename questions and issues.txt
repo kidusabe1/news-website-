@@ -1,4 +1,0 @@
-1. what is the outline and setup of the website?
-2. How do we select the headlines?
-3. How do we identify matching, repeating news articles?
-4. How to make the program into a wordpress plugin?

@@ -39,7 +39,7 @@ def scrape_telegram_channel(api_id, api_hash, phone_number, channel_username, da
                     if photo is not None:
                         image_bytes = client.download_media(photo, bytes)
                         if image_bytes is not None:
-                            image_path = f'images/{message.id}.jpg'  # Assuming you want to save the images in a folder named "images"
+                            image_path = f'C:/Users/KIIT/Local Sites/wescrape2/app/public/wp-content/images/{message.id}.jpg'  # Assuming you want to save the images in a folder named "images"
                             save_image_from_bytes(image_bytes, image_path)
 
                 data.append({'Text': text, 'Date': date, 'ImagePath': image_path})
@@ -54,7 +54,7 @@ phone_number = '918984937192'
 # channel_username = ['tikvahethiopia', 'fanatelevision', 'ethio_mereja', 'Esat_tv1']
 channel_username = ['tikvahethiopia', 'fanatelevision']
 
-date_limit = pd.Timestamp(2023, 6, 20)
+date_limit = pd.Timestamp(2023, 6, 26)
 
 # Scrape the Telegram channel
 scraped_data = scrape_telegram_channel(api_id, api_hash, phone_number, channel_username, date_limit)
@@ -63,13 +63,9 @@ scraped_data = scrape_telegram_channel(api_id, api_hash, phone_number, channel_u
 df = pd.DataFrame(scraped_data)
 
 # Generate image URLs based on the local file paths
-
-df['ImageURL'] = df['ImagePath'].apply(lambda path: os.path.abspath(path) if path is not None else '')
-
-
+base_url = 'http://wescrape2.local/wp-content/images/'
+df['ImageURL'] = df['ImagePath'].apply(lambda path: base_url + os.path.basename(path) if path is not None else '')
 
 # Specify the path and filename for the CSV file
-csv_filename = 'telegram_data.csv'
+csv_filename = 'C:/Users/KIIT/Local Sites/wescrape2/app/public/wp-content/plugins/telegram_data.csv'
 df.to_csv(csv_filename, index=False)
-#what do I need to solve next?
-#--> fix with the cell positioning of the images

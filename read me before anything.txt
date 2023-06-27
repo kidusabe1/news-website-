@@ -1,0 +1,10 @@
+: most important, go in to the python program and change the path of the files according to ur local oc environment
+1. first add the plugin file in ur wordpress(custom_3) plugin directory
+2. then run the telegram scraper python program(telegram_scraper)
+3. go and activate the plugin from dashboard
+
+
+
+
+
+
